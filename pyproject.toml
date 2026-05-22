@@ -28,6 +28,12 @@ black = "^24.8.0"
 line-length = 88
 target-version = "py311"
 
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "Q"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+
 [tool.black]
 line-length = 88
 target-version = ["py311"]
