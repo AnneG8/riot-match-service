@@ -13,6 +13,7 @@ uvicorn = { extras = ["standard"], version = "^0.44" }
 sqlalchemy = "^2.0.46"
 asyncpg = "^0.31.0"
 alembic = "^1.18.4"
+psycopg = {extras = ["binary"], version = "^3.3.3"}
 pydantic = {extras = ["mypy"], version = "^2.12"}
 pydantic-settings = "^2.12"
 httpx = "^0.28.1"

@@ -14,9 +14,17 @@ class Settings(BaseSettings):
     db_password: str = Field(alias='POSTGRES_PASSWORD')
 
     @property
-    def database_url(self) -> str:
+    def async_database_url(self) -> str:
         return (
             f'postgresql+asyncpg://'
+            f'{self.db_user}:{self.db_password}'
+            f'@{self.db_host}:{self.db_port}/{self.db_name}'
+        )
+
+    @property
+    def sync_database_url(self) -> str:
+        return (
+            f'postgresql+psycopg://'
             f'{self.db_user}:{self.db_password}'
             f'@{self.db_host}:{self.db_port}/{self.db_name}'
         )
