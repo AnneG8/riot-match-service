@@ -72,6 +72,10 @@ class MatchParticipant(Base, TimestampMixin):
         Integer,
     )
 
+    gold_spent: Mapped[int] = mapped_column(
+        Integer,
+    )
+
     total_damage_dealt: Mapped[int] = mapped_column(
         Integer,
     )

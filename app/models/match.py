@@ -32,11 +32,7 @@ class Match(Base, TimestampMixin):
         nullable=False,
     )
 
-    game_version: Mapped[str] = mapped_column(
-        String(32),
-    )
-
-    patch: Mapped[str] = mapped_column(
+    game_patch: Mapped[str] = mapped_column(
         String(16),
         nullable=False,
         index=True,
@@ -48,6 +44,12 @@ class Match(Base, TimestampMixin):
     )
 
     started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+    )
+
+    ended_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         index=True,
