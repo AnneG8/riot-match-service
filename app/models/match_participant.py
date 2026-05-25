@@ -39,7 +39,7 @@ class MatchParticipant(Base, TimestampMixin):
     )
 
     player_puuid: Mapped[str] = mapped_column(
-        ForeignKey('players.puuid', ondelete='CASCADE'),
+        ForeignKey('players.puuid'),
         nullable=False,
     )
 
@@ -50,6 +50,7 @@ class MatchParticipant(Base, TimestampMixin):
 
     team_position: Mapped[str] = mapped_column(
         String(30),
+        nullable=True,
     )
 
     kills: Mapped[int] = mapped_column(

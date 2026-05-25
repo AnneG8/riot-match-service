@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Index, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Boolean, DateTime, Index, Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -20,6 +20,10 @@ class Player(Base, TimestampMixin):
             'ix_players_game_name_tag_line',
             'game_name',
             'tag_line',
+            postgresql_where=text(
+                'game_name IS NOT NULL '
+                'AND tag_line IS NOT NULL'
+            ),
         ),
     )
 
@@ -28,28 +32,36 @@ class Player(Base, TimestampMixin):
         primary_key=True,
     )
 
-    game_name: Mapped[str] = mapped_column(
+    is_tracked: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        index=True,
+    )
+
+    last_synced_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    game_name: Mapped[str | None] = mapped_column(
         String(50),
-        nullable=False,
+        nullable=True,
     )
 
-    tag_line: Mapped[str] = mapped_column(
+    tag_line: Mapped[str | None] = mapped_column(
         Text,
-        nullable=False,
+        nullable=True,
     )
 
-    summoner_level: Mapped[int] = mapped_column(
+    summoner_level: Mapped[int | None] = mapped_column(
         Integer,
-        nullable=False,
+        nullable=True,
     )
 
-    profile_icon_id: Mapped[int] = mapped_column(
+    profile_icon_id: Mapped[int | None] = mapped_column(
         Integer,
-        nullable=False,
-    )
-
-    raw_data: Mapped[dict] = mapped_column(
-        JSONB,
+        nullable=True,
     )
 
     ranked_entries: Mapped[list[RankedEntry]] = relationship(
