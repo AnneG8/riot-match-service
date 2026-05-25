@@ -71,10 +71,25 @@ class RiotMatchInfoSchema(RiotBaseSchema):
     queue_id: int = Field(alias='queueId')
     participants: list[RiotParticipantSchema]
 
-    @field_validator('start_time', 'end_time', mode='before')
+    @field_validator('start_time', mode='before')
     @classmethod
-    def parse_timestamp(cls, value: int) -> datetime:
-        return datetime.fromtimestamp(value / 1000 - 1, tz=UTC)
+    def parse_start_time(cls, value: int) -> datetime:
+        return datetime.fromtimestamp(value / 1000, tz=UTC)
+
+    @field_validator('end_time', mode='before')
+    @classmethod
+    def parse_end_time(cls, value: int | None) -> datetime | None:
+        """
+        Парамерт gameEndTimestamp рассчитан в миллисекундах,
+        параметр startTime из запроса Riot Match-V5 - в секундах.
+
+        Сдвигаем end_time на +1 секунду, чтобы
+        повторно не получать последний синхронизированный матч.
+        """
+        if value is None:
+            return None
+
+        return datetime.fromtimestamp(value / 1000 + 1, tz=UTC)
 
 
 class RiotMatchSchema(RiotBaseSchema):
