@@ -92,5 +92,10 @@ class RiotMatchInfoSchema(RiotBaseSchema):
         return datetime.fromtimestamp(value / 1000 + 1, tz=UTC)
 
 
+class RiotMatchMetadataSchema(RiotBaseSchema):
+    match_id: str = Field(alias='matchId')
+
+
 class RiotMatchSchema(RiotBaseSchema):
+    metadata: RiotMatchMetadataSchema
     info: RiotMatchInfoSchema
