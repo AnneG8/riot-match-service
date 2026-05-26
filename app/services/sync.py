@@ -1,6 +1,6 @@
 import asyncio
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from app.core import UnitOfWork
 from app.integrations.riot import RiotAPIClient
@@ -56,9 +56,12 @@ class SyncService:
 
             latest_match_end = await uow.matches.get_latest_match_end(account.puuid)
 
-        start_time = None
-        if latest_match_end is not None:
-            start_time = int(latest_match_end.timestamp()) + 2
+        history_cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+
+        start_time = max(
+            int(latest_match_end.timestamp()) + 2,
+            int(history_cutoff.timestamp()),
+        )
 
         async for match_ids in self.riot_client.iter_match_id_pages(
             region=region,
