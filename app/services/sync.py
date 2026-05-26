@@ -58,7 +58,7 @@ class SyncService:
 
         start_time = None
         if latest_match_end is not None:
-            start_time = int(latest_match_end.timestamp())
+            start_time = int(latest_match_end.timestamp()) + 2
 
         async for match_ids in self.riot_client.iter_match_id_pages(
             region=region,
