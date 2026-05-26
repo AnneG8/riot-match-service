@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from typing import Any
 from urllib.parse import quote, urlparse
 
 import httpx
 from aiolimiter import AsyncLimiter
 
-from .constants import PLATFORM_BASE_URL, REGIONAL_BASE_URL
+from .constants import (
+    DEFAULT_MATCH_COUNT,
+    PLATFORM_BASE_URL,
+    REGIONAL_BASE_URL,
+)
 from .exceptions import (
     RiotAPIError,
     RiotForbiddenError,
@@ -180,7 +185,7 @@ class RiotAPIClient:
             region: str,
             puuid: str,
             start: int = 0,
-            count: int = 100,
+            count: int = DEFAULT_MATCH_COUNT,
             start_time: int | None = None,
     ) -> list[str]:
         url = self._regional_url(
@@ -199,6 +204,34 @@ class RiotAPIClient:
         data = await self._request(method='GET', url=url, params=params)
 
         return RiotMatchesSchema.model_validate(data).root
+
+    async def iter_match_id_pages(
+            self,
+            *,
+            region: str,
+            puuid: str,
+            start_time: int | None = None,
+            page_size: int = DEFAULT_MATCH_COUNT,
+    ) -> AsyncIterator[list[str]]:
+        start = 0
+
+        while True:
+            page = await self.get_match_ids_by_puuid(
+                region=region,
+                puuid=puuid,
+                start_time=start_time,
+                count=page_size,
+                start=start,
+            )
+            if not page:
+                break
+
+            yield page
+
+            if len(page) < page_size:
+                break
+            
+            start += page_size
 
     async def get_match(
             self,
