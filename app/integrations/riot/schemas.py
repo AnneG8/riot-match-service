@@ -71,9 +71,17 @@ class RiotMatchInfoSchema(RiotBaseSchema):
     queue_id: int = Field(alias='queueId')
     participants: list[RiotParticipantSchema]
 
-    @field_validator('start_time', 'end_time', mode='before')
+    @field_validator('start_time', mode='before')
     @classmethod
-    def parse_timestamp(cls, value: int) -> datetime:
+    def parse_start_time(cls, value: int) -> datetime:
+        return datetime.fromtimestamp(value / 1000, tz=UTC)
+
+    @field_validator('end_time', mode='before')
+    @classmethod
+    def parse_end_time(cls, value: int | None) -> datetime | None:
+        if value is None:
+            return None
+
         return datetime.fromtimestamp(value / 1000, tz=UTC)
 
 
