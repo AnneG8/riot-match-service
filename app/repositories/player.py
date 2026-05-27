@@ -17,7 +17,7 @@ class PlayerRepository:
             *,
             game_name: str,
             tag_line: str,
-    ) -> PlayerData | None:
+    ) -> PlayerProfileDTO | None:
         stmt = select(Player).where(
             Player.game_name == game_name,
             Player.tag_line == tag_line
@@ -29,7 +29,7 @@ class PlayerRepository:
         if player is None:
             return None
 
-        return PlayerData.from_model(player)
+        return PlayerProfileDTO.from_model(player)
 
     async def create_untracked_players(self, puuids: list[str]) -> None:
         if not puuids:
