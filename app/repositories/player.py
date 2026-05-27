@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Player
+from app.services.dto import PlayerProfileDTO
 
 from .types import PlayerData
 
@@ -78,3 +79,14 @@ class PlayerRepository:
         )
 
         await self.session.execute(stmt)
+
+    async def get_profile_by_puuid(self, puuid: str) -> PlayerProfileDTO | None:
+        stmt = select(Player).where(Player.puuid == puuid)
+
+        result = await self.session.execute(stmt)
+        player = result.scalar_one_or_none()
+
+        if player is None:
+            return None
+
+        return PlayerProfileDTO.from_model(player)
