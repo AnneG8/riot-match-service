@@ -25,7 +25,7 @@ class PlayerService:
             tag_line: str,
     ) -> str:
         async with self._uow_factory() as uow:
-            player = await uow.players.get_profile_by_riot_id(
+            player = await uow.players.get_by_riot_id(
                 game_name=game_name,
                 tag_line=tag_line,
             )
