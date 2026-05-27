@@ -63,6 +63,6 @@ class PlayerService:
         async with self._uow_factory() as uow:
             return await uow.matches.get_champion_stats(
                 puuid=puuid,
-                soloq_only=queue_id,
+                queue_id=queue_id,
                 recent_matches=recent_matches,
             )

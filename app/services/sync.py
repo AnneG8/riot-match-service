@@ -69,6 +69,9 @@ class SyncService:
 
         async with self._uow_factory() as uow:
             latest_match_end = await uow.matches.get_latest_match_end(puuid)
+            
+        if latest_match_end is None:
+            latest_match_end = 0
 
         start_time = max(
             int(latest_match_end.timestamp()) + 2,
