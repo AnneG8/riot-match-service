@@ -4,6 +4,7 @@ from app.constants import QueueId
 from app.core import UnitOfWork
 from app.dto import ChampionStatsDTO, MatchSummaryDTO, PlayerProfileDTO
 
+from .exceptions import PlayerNotFoundError
 from .sync import SyncService
 
 
@@ -42,7 +43,11 @@ class PlayerService:
 
     async def get_profile(self, puuid: str) -> PlayerProfileDTO | None:
         async with self._uow_factory() as uow:
-            return await uow.players.get_by_puuid(puuid)
+            player = await uow.players.get_by_puuid(puuid)
+            if player is None:
+                raise PlayerNotFoundError(puuid)
+            
+            return player
 
     async def get_recent_matches(
             self,
@@ -51,6 +56,10 @@ class PlayerService:
             limit: int = 20,
     ) -> list[MatchSummaryDTO]:
         async with self._uow_factory() as uow:
+            player = await uow.players.get_by_puuid(puuid)
+            if player is None:
+                raise PlayerNotFoundError(puuid)
+
             return await uow.matches.get_recent_matches(puuid=puuid, limit=limit)
 
     async def get_champion_stats(
@@ -61,6 +70,10 @@ class PlayerService:
             recent_matches: int,
     ) -> list[ChampionStatsDTO]:
         async with self._uow_factory() as uow:
+            player = await uow.players.get_by_puuid(puuid)
+            if player is None:
+                raise PlayerNotFoundError(puuid)
+            
             return await uow.matches.get_champion_stats(
                 puuid=puuid,
                 queue_id=queue_id,
