@@ -23,22 +23,26 @@ aiolimiter = "^1.2.1"
 
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.6.7"
-black = "^24.8.0"
+isort = "^8.0.1"
+flake8 = "^7.3.0"
+flake8-quotes = "^3.4.0"
+mypy = "^2.1.0"
+pre-commit = "^4.6.0"
 
-[tool.ruff]
-line-length = 88
-target-version = "py311"
+[tool.isort]
+profile = "black"
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP", "Q"]
+[tool.mypy]
+python_version = "3.11"
+plugins = ["pydantic.mypy"]
+exclude = "alembic/versions/.*\\.py$"
 
-[tool.ruff.lint.flake8-quotes]
-inline-quotes = "single"
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
 
-[tool.black]
-line-length = 88
-target-version = ["py311"]
 
 
 [build-system]
