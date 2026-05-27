@@ -20,15 +20,15 @@ class SyncService:
         self._uow_factory = uow_factory
         self.riot_client = riot_client
 
-    async def sync_player(
+    async def sync_player_profile(
             self,
             *,
             platform: str,
             game_name: str,
             tag_line: str,
-    ) -> None:
+    ) -> str:
         region = get_region_by_platform(platform)
-        
+
         account = await self.riot_client.get_account_by_riot_id(
             region=region,
             game_name=game_name,
@@ -50,13 +50,25 @@ class SyncService:
         ranked_entries = RankedEntryMapper.entries_from_riot(league_entries)
 
         async with self._uow_factory() as uow:
+            player_data.last_synced_at = datetime.now(timezone.utc)
             await uow.players.upsert(player_data)
 
             await uow.ranked.upsert_entries(ranked_entries)
+            
+        return account.puuid
 
-            latest_match_end = await uow.matches.get_latest_match_end(account.puuid)
+    async def sync_player_matches(
+            self,
+            *,
+            platform: str,
+            puuid: str,
+    ) -> None:
+        region = get_region_by_platform(platform)
 
         history_cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+
+        async with self._uow_factory() as uow:
+            latest_match_end = await uow.matches.get_latest_match_end(puuid)
 
         start_time = max(
             int(latest_match_end.timestamp()) + 2,
@@ -65,14 +77,11 @@ class SyncService:
 
         async for match_ids in self.riot_client.iter_match_id_pages(
             region=region,
-            puuid=account.puuid,
+            puuid=puuid,
             start_time=start_time,
         ):
             coros = [
-                self.riot_client.get_match(
-                    region=region,
-                    match_id=match_id,
-                )
+                self.riot_client.get_match(region=region, match_id=match_id)
                 for match_id in match_ids
             ]
             results = await asyncio.gather(*coros, return_exceptions=True)
@@ -98,7 +107,7 @@ class SyncService:
                     participant_puuids = [
                         participant.player_puuid
                         for participant in participants_data
-                        if participant.player_puuid != account.puuid
+                        if participant.player_puuid != puuid
                     ]
 
                     await uow.players.create_untracked_players(participant_puuids)
@@ -107,7 +116,20 @@ class SyncService:
 
                     await uow.matches.insert_participants(participants_data)
 
-        async with self._uow_factory() as uow:
-            player_data.last_synced_at = datetime.now(timezone.utc)
+    async def full_sync_player(
+            self,
+            *,
+            platform: str,
+            game_name: str,
+            tag_line: str,
+    ) -> None:
+        puuid = await self.sync_player_profile(
+            platform=platform,
+            game_name=game_name,
+            tag_line=tag_line,
+        )
 
-            await uow.players.upsert(player_data)
+        await self.sync_player_matches(
+            platform=platform,
+            puuid=puuid,
+        )
