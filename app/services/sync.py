@@ -67,14 +67,14 @@ class SyncService:
 
         async with self._uow_factory() as uow:
             latest_match_end = await uow.matches.get_latest_match_end(puuid)
-            
-        if latest_match_end is None:
-            latest_match_end = 0
 
-        start_time = max(
-            int(latest_match_end.timestamp()) + 2,
-            int(history_cutoff.timestamp()),
-        )
+        start_time = int(history_cutoff.timestamp())
+
+        if latest_match_end is not None:
+            start_time = max(
+                int(latest_match_end.timestamp()) + 2,
+                start_time,
+            )
 
         async for match_ids in self.riot_client.iter_match_id_pages(
             region=region,

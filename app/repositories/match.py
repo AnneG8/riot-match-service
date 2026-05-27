@@ -65,7 +65,7 @@ class MatchRepository:
 
         stmt = insert(MatchParticipant).values(values)
         stmt = stmt.on_conflict_do_nothing(
-            constraint='uq_match_participant_match_player',
+            constraint='uq_match_player_match_participant',
         )
 
         await self.session.execute(stmt)
