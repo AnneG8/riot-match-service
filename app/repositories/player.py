@@ -12,15 +12,6 @@ class PlayerRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_puuid(self, puuid: str) -> PlayerData | None:
-        player = await self.session.get(Player, puuid)
-
-        if player is None:
-            return None
-
-        return PlayerData.from_model(player)
-        
-
     async def get_by_riot_id(
             self,
             *,
