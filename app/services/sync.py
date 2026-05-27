@@ -5,9 +5,7 @@ from datetime import datetime, timedelta, timezone
 from app.core import UnitOfWork
 from app.integrations.riot import RiotAPIClient
 from app.integrations.riot.exceptions import RiotNotFoundError
-from app.mappers import MatchMapper, PlayerMapper, RankedEntryMapper
-
-from .utils import get_region_by_platform
+from app.mappers import MatchMapper, PlayerMapper, RankedEntryMapper, RegionMapper
 
 
 class SyncService:
@@ -27,7 +25,7 @@ class SyncService:
             game_name: str,
             tag_line: str,
     ) -> str:
-        region = get_region_by_platform(platform)
+        region = RegionMapper.from_platform(platform).value
 
         account = await self.riot_client.get_account_by_riot_id(
             region=region,
@@ -63,7 +61,7 @@ class SyncService:
             platform: str,
             puuid: str,
     ) -> None:
-        region = get_region_by_platform(platform)
+        region = RegionMapper.from_platform(platform)
 
         history_cutoff = datetime.now(timezone.utc) - timedelta(days=30)
 

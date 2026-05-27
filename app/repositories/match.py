@@ -5,8 +5,8 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager
 
-from app.constants import QueueId
 from app.dto import ChampionStatsDTO, MatchSummaryDTO
+from app.enums import QueueId
 from app.models import Match, MatchParticipant
 
 from .types import MatchData, MatchParticipantData

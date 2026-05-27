@@ -1,8 +1,8 @@
 from collections.abc import Callable
 
-from app.constants import QueueId
 from app.core import UnitOfWork
 from app.dto import ChampionStatsDTO, MatchSummaryDTO, PlayerProfileDTO
+from app.enums import Platform, QueueId
 
 from .exceptions import PlayerNotFoundError
 from .sync import SyncService
@@ -21,7 +21,7 @@ class PlayerService:
     async def find_player_by_riot_id(
             self,
             *,
-            platform: str,
+            platform: Platform,
             game_name: str,
             tag_line: str,
     ) -> str:
@@ -35,7 +35,7 @@ class PlayerService:
             return player.puuid
 
         puuid = await self._sync_service.sync_player_profile(
-            platform=platform,
+            platform=platform.value,
             game_name=game_name,
             tag_line=tag_line,
         )
