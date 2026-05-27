@@ -41,7 +41,6 @@ def register_exception_handlers(app: FastAPI) -> None:
             },
         )
 
-
     @app.exception_handler(RiotRateLimitError)
     async def riot_rate_limit_handler(
         request: Request,

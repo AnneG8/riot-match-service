@@ -50,7 +50,7 @@ class MatchMapper:
                 + participant.neutral_minions_killed
             ),
         )
-    
+
     @staticmethod
     def participants_from_riot(
         *,

@@ -9,7 +9,6 @@ from app.models.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from .match import Match
-    from .player import Player
 
 
 class MatchParticipant(Base, TimestampMixin):

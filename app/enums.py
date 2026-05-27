@@ -44,4 +44,3 @@ class RankedQueueType(StrEnum):
     RANKED_FLEX_SR = 'RANKED_FLEX_SR'
     NORMAL_DRAFT_5x5 = 'NORMAL_DRAFT_5x5'
     NORMAL_BLIND_V5 = 'NORMAL_BLIND_V5'
-

@@ -92,7 +92,7 @@ class RiotAPIClient:
 
                 if status_code == 429:
                     retry_after = int(err.response.headers.get('Retry-After', '1'))
-                    
+
                     if attempt == self.MAX_RETRIES - 1:
                         raise RiotRateLimitError(
                             method=method,
@@ -136,7 +136,7 @@ class RiotAPIClient:
     ) -> RiotAccountSchema:
         safe_game_name = quote(game_name, safe='')
         safe_tag_line = quote(tag_line, safe='')
-        
+
         url = self._regional_url(
             region,
             (
@@ -230,7 +230,7 @@ class RiotAPIClient:
 
             if len(page) < page_size:
                 break
-            
+
             start += page_size
 
     async def get_match(

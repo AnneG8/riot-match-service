@@ -93,7 +93,6 @@ class MatchRepository:
             for participant in participants
         ]
 
-
     async def get_champion_stats(
             self,
             *,
@@ -143,7 +142,7 @@ class MatchRepository:
             )
             .where(MatchParticipant.id.in_(select(recent_matches_subquery.c.id)))
             .group_by(MatchParticipant.champion_name)
-            .order_by(desc('games'),desc('win_rate'))
+            .order_by(desc('games'), desc('win_rate'))
         )
 
         result = await self.session.execute(stmt)

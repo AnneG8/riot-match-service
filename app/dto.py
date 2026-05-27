@@ -57,7 +57,7 @@ class MatchSummaryDTO:
     game_patch: str
     started_at: datetime
     game_duration: int
-    
+
     champion_name: str
     team_position: str | None
 
@@ -86,7 +86,7 @@ class MatchSummaryDTO:
             win=participant.win,
         )
 
-    
+
 @dataclass(slots=True)
 class ChampionStatsDTO:
     champion_name: str
@@ -102,4 +102,3 @@ class ChampionStatsDTO:
 
     average_kda: float
     average_cs: float
-    

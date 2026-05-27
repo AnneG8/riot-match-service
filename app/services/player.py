@@ -35,7 +35,7 @@ class PlayerService:
             return player.puuid
 
         puuid = await self._sync_service.sync_player_profile(
-            platform=platform.value,
+            platform=platform,
             game_name=game_name,
             tag_line=tag_line,
         )
@@ -46,7 +46,7 @@ class PlayerService:
             player = await uow.players.get_by_puuid(puuid)
             if player is None:
                 raise PlayerNotFoundError(puuid)
-            
+
             return player
 
     async def get_recent_matches(
@@ -73,7 +73,7 @@ class PlayerService:
             player = await uow.players.get_by_puuid(puuid)
             if player is None:
                 raise PlayerNotFoundError(puuid)
-            
+
             return await uow.matches.get_champion_stats(
                 puuid=puuid,
                 queue_id=queue_id,

@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.http_client = http_client
     app.state.riot_client = riot_client
     app.state.background_tasks = set()
-    
+
     yield
 
     tasks = list(app.state.background_tasks)

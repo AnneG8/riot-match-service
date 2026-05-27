@@ -31,7 +31,7 @@ class PlayerData(BaseData):
     profile_icon_id: int | None
     is_tracked: bool = False
     last_synced_at: datetime | None = None
-    
+
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -92,7 +92,7 @@ class MatchData(BaseData):
     started_at: datetime
     ended_at: datetime
     raw_data: dict[str, Any]
-    
+
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

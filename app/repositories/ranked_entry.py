@@ -19,7 +19,7 @@ class RankedEntryRepository:
                 'updated_at',
             }
         )
-        
+
         stmt = insert(RankedEntry).values(**values)
         stmt = stmt.on_conflict_do_update(
             constraint='uq_ranked_entry_player_queue',
@@ -39,7 +39,7 @@ class RankedEntryRepository:
     async def upsert_entries(self, entries_data: list[RankedEntryData]) -> None:
         if not entries_data:
             return
-        
+
         values = [
             entry_data.to_insert_dict(
                 exclude={

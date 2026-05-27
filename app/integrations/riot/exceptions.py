@@ -21,6 +21,7 @@ class RiotError(Exception):
             f'{self.message} [{self.method} {self.url}]'
         )
 
+
 class RiotRequestError(RiotError):
     pass
 

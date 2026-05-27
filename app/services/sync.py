@@ -3,6 +3,7 @@ from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
 from app.core import UnitOfWork
+from app.enums import Platform
 from app.integrations.riot import RiotAPIClient
 from app.integrations.riot.exceptions import RiotNotFoundError
 from app.mappers import MatchMapper, PlayerMapper, RankedEntryMapper, RegionMapper
@@ -21,7 +22,7 @@ class SyncService:
     async def sync_player_profile(
             self,
             *,
-            platform: str,
+            platform: Platform,
             game_name: str,
             tag_line: str,
     ) -> str:
@@ -52,13 +53,13 @@ class SyncService:
             await uow.players.upsert(player_data)
 
             await uow.ranked.upsert_entries(ranked_entries)
-            
+
         return account.puuid
 
     async def sync_player_matches(
             self,
             *,
-            platform: str,
+            platform: Platform,
             puuid: str,
     ) -> None:
         region = RegionMapper.from_platform(platform)
@@ -120,7 +121,7 @@ class SyncService:
     async def full_sync_player(
             self,
             *,
-            platform: str,
+            platform: Platform,
             game_name: str,
             tag_line: str,
     ) -> None:
