@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     db_user: str = Field(alias='POSTGRES_USER')
     db_password: str = Field(alias='POSTGRES_PASSWORD')
 
+    debug: bool = False
+
     @property
     def async_database_url(self) -> str:
         return (
