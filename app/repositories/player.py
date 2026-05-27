@@ -71,7 +71,7 @@ class PlayerRepository:
 
         await self.session.execute(stmt)
 
-    async def get_profile_by_puuid(self, puuid: str) -> PlayerProfileDTO | None:
+    async def get_by_puuid(self, puuid: str) -> PlayerProfileDTO | None:
         stmt = select(Player).where(Player.puuid == puuid)
 
         result = await self.session.execute(stmt)

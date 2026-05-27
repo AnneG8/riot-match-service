@@ -11,7 +11,7 @@ class PlayerService:
 
     async def get_profile(self, puuid: str) -> PlayerProfileDTO | None:
         async with self._uow_factory() as uow:
-            return await uow.players.get_profile_by_puuid(puuid)
+            return await uow.players.get_by_puuid(puuid)
 
     async def get_recent_matches(
             self,
