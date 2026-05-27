@@ -2,7 +2,7 @@ from collections.abc import Callable
 
 from app.constants import QueueId
 from app.core import UnitOfWork
-from app.services.dto import ChampionStatsDTO, MatchSummaryDTO, PlayerProfileDTO
+from app.dto import ChampionStatsDTO, MatchSummaryDTO, PlayerProfileDTO
 
 from .sync import SyncService
 

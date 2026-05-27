@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager
 
 from app.constants import QueueId
+from app.dto import ChampionStatsDTO, MatchSummaryDTO
 from app.models import Match, MatchParticipant
-from app.services.dto import ChampionStatsDTO, MatchSummaryDTO
 
 from .types import MatchData, MatchParticipantData
 

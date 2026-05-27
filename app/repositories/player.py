@@ -2,8 +2,8 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.dto import PlayerProfileDTO
 from app.models import Player
-from app.services.dto import PlayerProfileDTO
 
 from .types import PlayerData
 
