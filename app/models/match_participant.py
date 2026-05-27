@@ -22,9 +22,9 @@ class MatchParticipant(Base, TimestampMixin):
             'champion_name',
         ),
         UniqueConstraint(
-            'match_id',
             'player_puuid',
-            name='uq_match_participant_match_player',
+            'match_id',
+            name='uq_match_player_match_participant',
         ),
     )
 
@@ -88,8 +88,6 @@ class MatchParticipant(Base, TimestampMixin):
     creep_score: Mapped[int] = mapped_column(
         Integer,
     )
-
-    player: Mapped[Player] = relationship('Player')
 
     match: Mapped[Match] = relationship(
         'Match',

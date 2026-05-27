@@ -46,7 +46,7 @@ class RankedEntry(Base, TimestampMixin):
 
     rank: Mapped[str] = mapped_column(
         String(8),
-        nullable=False,
+        nullable=True,
     )
 
     league_points: Mapped[int] = mapped_column(

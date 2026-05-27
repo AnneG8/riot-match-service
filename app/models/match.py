@@ -17,7 +17,7 @@ class Match(Base, TimestampMixin):
     __tablename__ = 'matches'
 
     match_id: Mapped[str] = mapped_column(
-        String(32),
+        String(50),
         primary_key=True,
     )
 
