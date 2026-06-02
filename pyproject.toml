@@ -20,6 +20,7 @@ httpx = "^0.28.1"
 python-dotenv = "^1.2.2"
 orjson = "^3.11.9"
 aiolimiter = "^1.2.1"
+structlog = "^25.5.0"
 
 
 [tool.poetry.group.dev.dependencies]

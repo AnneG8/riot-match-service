@@ -6,6 +6,7 @@ from typing import Any
 from urllib.parse import quote, urlparse
 
 import httpx
+import structlog
 from aiolimiter import AsyncLimiter
 
 from .constants import (
@@ -29,6 +30,8 @@ from .schemas import (
     RiotRankedEntrySchema,
     RiotSummonerSchema,
 )
+
+logger = structlog.get_logger(__name__)
 
 
 class RiotAPIClient:
@@ -58,6 +61,12 @@ class RiotAPIClient:
         return f'{REGIONAL_BASE_URL.format(region=region)}{path}'
 
     async def _request(self, method: str, url: str, **kwargs) -> dict[str, Any]:
+        logger.debug(
+            'riot_request',
+            method=method,
+            url=url,
+        )
+
         short_limiter, long_limiter = self._get_limiters(url)
 
         for attempt in range(self.MAX_RETRIES):
@@ -65,9 +74,24 @@ class RiotAPIClient:
                 async with short_limiter:
                     async with long_limiter:
                         response = await self._client.request(method, url, **kwargs)
+
+                logger.debug(
+                    'riot_response',
+                    method=method,
+                    url=url,
+                    status_code=response.status_code,
+                )
+
                 response.raise_for_status()
                 return response.json()
             except httpx.RequestError as err:
+                logger.warning(
+                    'riot_request_retry',
+                    method=method,
+                    url=url,
+                    attempt=attempt + 1,
+                )
+
                 if attempt == self.MAX_RETRIES - 1:
                     raise RiotRequestError(str(err), method=method, url=url) from err
 
@@ -77,6 +101,13 @@ class RiotAPIClient:
                 status_code = err.response.status_code
 
                 if status_code == 403:
+                    logger.error(
+                        'riot_api_key_invalid',
+                        method=method,
+                        url=url,
+                        status_code=403,
+                    )
+
                     raise RiotForbiddenError(
                         method=method,
                         url=url,
@@ -93,6 +124,13 @@ class RiotAPIClient:
                 if status_code == 429:
                     retry_after = int(err.response.headers.get('Retry-After', '1'))
 
+                    logger.warning(
+                        'riot_rate_limit',
+                        method=method,
+                        url=url,
+                        retry_after=retry_after,
+                    )
+
                     if attempt == self.MAX_RETRIES - 1:
                         raise RiotRateLimitError(
                             method=method,
@@ -105,6 +143,14 @@ class RiotAPIClient:
                     continue
 
                 if status_code >= 500:
+                    logger.warning(
+                        'riot_server_retry',
+                        method=method,
+                        url=url,
+                        status_code=status_code,
+                        attempt=attempt + 1,
+                    )
+
                     if attempt == self.MAX_RETRIES - 1:
                         raise RiotServerError(
                             method=method,

@@ -2,11 +2,15 @@ import asyncio
 from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
+import structlog
+
 from app.core import UnitOfWork
 from app.enums import Platform
 from app.integrations.riot import RiotAPIClient
 from app.integrations.riot.exceptions import RiotNotFoundError
 from app.mappers import MatchMapper, PlayerMapper, RankedEntryMapper, RegionMapper
+
+logger = structlog.get_logger(__name__)
 
 
 class SyncService:
@@ -26,6 +30,13 @@ class SyncService:
             game_name: str,
             tag_line: str,
     ) -> str:
+        logger.info(
+            'player_profile_sync_started',
+            platform=platform.value,
+            game_name=game_name,
+            tag_line=tag_line,
+        )
+
         region = RegionMapper.from_platform(platform).value
 
         account = await self.riot_client.get_account_by_riot_id(
@@ -46,6 +57,12 @@ class SyncService:
             puuid=account.puuid,
         )
 
+        logger.info(
+            'player_profile_fetched',
+            puuid=account.puuid,
+            ranked_entries=len(league_entries),
+        )
+
         ranked_entries = RankedEntryMapper.entries_from_riot(league_entries)
 
         async with self._uow_factory() as uow:
@@ -53,6 +70,11 @@ class SyncService:
             await uow.players.upsert(player_data)
 
             await uow.ranked.upsert_entries(ranked_entries)
+
+            logger.info(
+                'player_profile_sync_finished',
+                puuid=account.puuid,
+            )
 
         return account.puuid
 
@@ -62,6 +84,12 @@ class SyncService:
             platform: Platform,
             puuid: str,
     ) -> None:
+        logger.info(
+            'player_matches_sync_started',
+            puuid=puuid,
+            platform=platform.value,
+        )
+
         region = RegionMapper.from_platform(platform)
 
         history_cutoff = datetime.now(timezone.utc) - timedelta(days=30)
@@ -77,11 +105,26 @@ class SyncService:
                 start_time,
             )
 
+        logger.info(
+            'player_matches_sync_window',
+            puuid=puuid,
+            start_time=start_time,
+        )
+
         async for match_ids in self.riot_client.iter_match_id_pages(
             region=region,
             puuid=puuid,
             start_time=start_time,
         ):
+            logger.info(
+                'match_page_loaded',
+                puuid=puuid,
+                matches_count=len(match_ids),
+            )
+
+            saved_matches = 0
+            skipped_matches = 0
+
             coros = [
                 self.riot_client.get_match(region=region, match_id=match_id)
                 for match_id in match_ids
@@ -99,6 +142,7 @@ class SyncService:
                     match_data = MatchMapper.from_riot(result)
 
                     if match_data is None:
+                        skipped_matches += 1
                         continue
 
                     participants_data = MatchMapper.participants_from_riot(
@@ -113,10 +157,23 @@ class SyncService:
                     ]
 
                     await uow.players.create_untracked_players(participant_puuids)
-
                     await uow.matches.insert_match(match_data)
-
                     await uow.matches.insert_participants(participants_data)
+
+                    saved_matches += 1
+
+            logger.info(
+                'match_page_processed',
+                puuid=puuid,
+                matches_count=len(match_ids),
+                saved_matches=saved_matches,
+                skipped_matches=skipped_matches,
+            )
+
+        logger.info(
+            'player_matches_sync_finished',
+            puuid=puuid,
+        )
 
     async def full_sync_player(
             self,

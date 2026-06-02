@@ -1,3 +1,4 @@
+import structlog
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
@@ -11,6 +12,8 @@ from app.integrations.riot.exceptions import (
     RiotServerError,
 )
 from app.services.exceptions import PlayerNotFoundError
+
+logger = structlog.get_logger(__name__)
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -111,6 +114,12 @@ def register_exception_handlers(app: FastAPI) -> None:
         request: Request,
         exc: Exception,
     ) -> JSONResponse:
+        logger.exception(
+            'unhandled_exception',
+            path=str(request.url),
+            method=request.method,
+        )
+
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={

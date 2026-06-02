@@ -1,11 +1,15 @@
 from collections.abc import Callable
 
+import structlog
+
 from app.core import UnitOfWork
 from app.dto import ChampionStatsDTO, MatchSummaryDTO, PlayerProfileDTO
 from app.enums import Platform, QueueId
 
 from .exceptions import PlayerNotFoundError
 from .sync import SyncService
+
+logger = structlog.get_logger(__name__)
 
 
 class PlayerService:
@@ -32,7 +36,20 @@ class PlayerService:
             )
 
         if player is not None:
+            logger.info(
+                'player_found_in_db',
+                game_name=game_name,
+                tag_line=tag_line,
+                puuid=player.puuid,
+            )
+
             return player.puuid
+
+        logger.info(
+            'player_not_found_in_db',
+            game_name=game_name,
+            tag_line=tag_line,
+        )
 
         puuid = await self._sync_service.sync_player_profile(
             platform=platform,
@@ -45,6 +62,11 @@ class PlayerService:
         async with self._uow_factory() as uow:
             player = await uow.players.get_by_puuid(puuid)
             if player is None:
+                logger.warning(
+                    'player_not_found',
+                    puuid=puuid,
+                )
+
                 raise PlayerNotFoundError(puuid)
 
             return player
@@ -58,6 +80,11 @@ class PlayerService:
         async with self._uow_factory() as uow:
             player = await uow.players.get_by_puuid(puuid)
             if player is None:
+                logger.warning(
+                    'player_not_found',
+                    puuid=puuid,
+                )
+
                 raise PlayerNotFoundError(puuid)
 
             return await uow.matches.get_recent_matches(puuid=puuid, limit=limit)
@@ -72,6 +99,11 @@ class PlayerService:
         async with self._uow_factory() as uow:
             player = await uow.players.get_by_puuid(puuid)
             if player is None:
+                logger.warning(
+                    'player_not_found',
+                    puuid=puuid,
+                )
+
                 raise PlayerNotFoundError(puuid)
 
             return await uow.matches.get_champion_stats(
