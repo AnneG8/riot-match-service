@@ -24,6 +24,7 @@ Backend-сервис для сбора и агрегации данных мат
 * `Alembic`
 * `Pydantic v2`
 * `httpx`
+* `structlog`
 * `Docker` / `Docker Compose`
 * `Poetry`
 
@@ -76,6 +77,14 @@ FastAPI routers, схемы запросов/ответов, dependency injectio
 * PostgreSQL indexes и constraints
 * JSONB для хранения raw Riot API payloads
 * TimestampMixin с created_at и updated_at
+
+
+## Logging
+
+Структурированное логирование через `structlog`.
+
+* единое форматирование логов для приложения и используемых библиотек
+* ConsoleRenderer - для dev, машиночитаемый JSONRenderer - для production
 
 ---
 
@@ -493,6 +502,16 @@ extra='ignore'
 ```
 
 Это защищает сервис от падений при появлении новых полей в Riot API.
+
+---
+
+# Логирование
+
+Используется `structlog` поверх стандартного `logging`.
+
+При `DEBUG=True` используется `ConsoleRenderer` - логи выводятся в удобном для чтения человеком формате.
+
+При `DEBUG=False` используется `JSONRenderer` - логи выводятся в виде JSON-событий, пригодных для агрегации и парсинга системами мониторинга.
 
 ---
 
